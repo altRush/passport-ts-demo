@@ -13,7 +13,7 @@ interface Todo {
 declare global {
 	namespace Express {
 		interface User {
-			id: string;
+			id: number;
 			salt: string;
 			hashed_password: NodeJS.ArrayBufferView;
 			username: string;
@@ -120,6 +120,10 @@ router.get('/login', (req, res: Response, next) => {
 	res.render('login');
 });
 
+router.get('/signup', function (req, res, next) {
+	res.render('signup');
+});
+
 router.get('/active', fetchTodos, (req: Request, res: Response, next) => {
 	res.locals.todos = (res.locals.todos as Todo[]).filter(todo => {
 		return !todo.completed;
@@ -162,6 +166,41 @@ router.post(
 	}
 );
 
+router.post('/signup', function (req, res, next) {
+	var salt = crypto.randomBytes(16);
+	crypto.pbkdf2(
+		req.body.password,
+		salt,
+		310000,
+		32,
+		'sha256',
+		function (err, hashedPassword) {
+			if (err) {
+				return next(err);
+			}
+			db.run(
+				'INSERT INTO users (username, hashed_password, salt) VALUES (?, ?, ?)',
+				[req.body.username, hashedPassword, salt],
+				function (err) {
+					if (err) {
+						return next(err);
+					}
+					var user = {
+						id: this.lastID,
+						username: req.body.username
+					};
+					req.login(user as Express.User, function (err) {
+						if (err) {
+							return next(err);
+						}
+						res.redirect('/');
+					});
+				}
+			);
+		}
+	);
+});
+
 router.post(
 	'/login/password',
 	passport.authenticate('local', {
@@ -169,6 +208,15 @@ router.post(
 		failureRedirect: '/login'
 	})
 );
+
+router.post('/logout', function (req, res, next) {
+	req.logout(function (err) {
+		if (err) {
+			return next(err);
+		}
+		res.redirect('/');
+	});
+});
 
 router.post(
 	'/:id(\\d+)',
