@@ -1,4 +1,7 @@
 import express, { NextFunction, Request, Response } from 'express';
+import passport from 'passport';
+import { Strategy as LocalStrategy } from 'passport-local';
+import crypto from 'crypto';
 import db from '../db';
 
 interface Todo {
@@ -11,6 +14,9 @@ declare global {
 	namespace Express {
 		interface User {
 			id: string;
+			salt: string;
+			hashed_password: NodeJS.ArrayBufferView;
+			username: string;
 		}
 	}
 }
@@ -44,6 +50,56 @@ function fetchTodos(req: Request, res: Response, next: NextFunction) {
 
 const router = express.Router();
 
+passport.serializeUser(function (user: Express.User, cb) {
+	process.nextTick(function () {
+		cb(null, { id: user.id, username: user.username });
+	});
+});
+
+passport.deserializeUser(function (user: Express.User, cb) {
+	process.nextTick(function () {
+		return cb(null, user);
+	});
+});
+
+passport.use(
+	new LocalStrategy(function verify(username, password, cb) {
+		db.get(
+			'SELECT * FROM users WHERE username = ?',
+			[username],
+			function (err, row: Express.User) {
+				if (err) {
+					return cb(err);
+				}
+				if (!row) {
+					return cb(null, false, {
+						message: 'Incorrect username or password.'
+					});
+				}
+
+				crypto.pbkdf2(
+					password,
+					row.salt,
+					310000,
+					32,
+					'sha256',
+					function (err, hashedPassword) {
+						if (err) {
+							return cb(err);
+						}
+						if (!crypto.timingSafeEqual(row.hashed_password, hashedPassword)) {
+							return cb(null, false, {
+								message: 'Incorrect username or password.'
+							});
+						}
+						return cb(null, row);
+					}
+				);
+			}
+		);
+	})
+);
+
 /* GET home page. */
 router.get(
 	'/',
@@ -60,7 +116,7 @@ router.get(
 	}
 );
 
-router.get('/login', function (req, res: Response, next) {
+router.get('/login', (req, res: Response, next) => {
 	res.render('login');
 });
 
@@ -104,6 +160,14 @@ router.post(
 			}
 		);
 	}
+);
+
+router.post(
+	'/login/password',
+	passport.authenticate('local', {
+		successRedirect: '/',
+		failureRedirect: '/login'
+	})
 );
 
 router.post(

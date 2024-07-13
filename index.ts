@@ -11,12 +11,16 @@ import express, { Request, Response } from 'express';
 import path from 'path';
 import cookieParser from 'cookie-parser';
 import logger from 'morgan';
+import session, { Store } from 'express-session';
+import SQLiteStoreImport from 'connect-sqlite3';
 
 import router from './routes';
 
 const app = express();
+const SQLiteStore = SQLiteStoreImport(session);
 
 import pluralize from 'pluralize';
+import passport from 'passport';
 
 app.locals.pluralize = pluralize;
 
@@ -29,6 +33,15 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(
+	session({
+		secret: 'keyboard cat',
+		resave: false,
+		saveUninitialized: false,
+		store: new SQLiteStore({ db: 'sessions.db', dir: './var/db' }) as Store
+	})
+);
+app.use(passport.authenticate('session'));
 
 app.use('/', router);
 
