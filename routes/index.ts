@@ -9,7 +9,7 @@ interface Todo {
 
 declare global {
 	namespace Express {
-		export interface User {
+		interface User {
 			id: string;
 		}
 	}
@@ -59,6 +59,10 @@ router.get(
 		res.render('index', { user: req.user });
 	}
 );
+
+router.get('/login', function (req, res: Response, next) {
+	res.render('login');
+});
 
 router.get('/active', fetchTodos, (req: Request, res: Response, next) => {
 	res.locals.todos = (res.locals.todos as Todo[]).filter(todo => {
