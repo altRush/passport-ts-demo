@@ -1,40 +1,12 @@
-# todos-express-starter
+# Todos app with PassportJS and TypeScript
 
-This is a starter kit for building a todo app with sign in functionality using
-[Express](https://expressjs.com/), [Passport](https://www.passportjs.org/) and
-[SQLite](https://www.sqlite.org/).
+## Running locally
 
-The following is a list of complete, working example apps that have been built
-using this kit as a starting point.
+This command should spin up a server and allow you to browse the todos app locally. It also watch your files changes and will restart the app upon on the changes detected.
 
-* [todos-express-password](https://github.com/passport/todos-express-password)
-
-  Illustrates how to sign in with a username and password.
-
-* [todos-express-password-flash](https://github.com/passport/todos-express-password-flash)
-
-  Illustrates how to sign in with a username and password and use the flash for
-  informative messages.
-
-* [todos-express-google](https://github.com/passport/todos-express-google)
-
-  Illustrates how to sign in with Google via OpenID Connect.
-
-* [todos-express-google-oauth2](https://github.com/passport/todos-express-google-oauth2)
-
-  Illustrates how to sign in with Google via OAuth 2.0.
-
-* [todos-express-email](https://github.com/passport/todos-express-email)
-
-  Illustrates how to sign in with email via magic link.
-
-* [todos-express-auth0](https://github.com/passport/todos-express-auth0)
-
-  Illustrates how to implement sign in by integrating with Auth0 via OpenID Connect.
-
-* [todos-express-openidconnect](https://github.com/passport/todos-express-openidconnect)
-
-  Illustrates how to implement sign in by integrating with an identity provider (IdP) via OpenID Connect.
+```bash
+npm run dev
+```
 
 ## License
 
@@ -42,4 +14,5 @@ using this kit as a starting point.
 
 ## Credit
 
-Created by [Jared Hanson](https://www.jaredhanson.me/)
+Master JS version created by [Jared Hanson](https://www.jaredhanson.me/)
+TS version by [Rush WP](https://x.com/extremelyRush)
